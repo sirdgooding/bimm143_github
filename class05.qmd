@@ -1,0 +1,189 @@
+---
+title: "Class 5: Data visualization with ggplot2"
+author: "David Gooding (A17798923)"
+format: html
+editor: visual
+toc: true
+---
+## Background 
+
+There are many *graphic systems* in R for amking plots and figures. These include **"base R graphics"** like the `plot()` and add-on packages like **ggplot2**. 
+
+Let's compare how we make a simple graph with these two systems:
+
+We can use the in-built `cars` dataset:
+
+```{r}
+head(cars)
+```
+
+A base R plot:
+
+```{r}
+plot(cars)
+```
+
+Now for **ggplot2**
+ Before I can use ggplot2 I need to install it on my computer. To do this we can use the function `install.packages("ggplot2")`
+
+> **N.D** We never run an `install.packages()` in our quarto doc (we run it in our R concole) as it would re-install the package every time I render my document. 
+
+
+Once installed we still need to load it up into our R session. We do this with `libary()` call
+
+```{r}
+library(ggplot2)
+ggplot(cars)
+```
+
+Every ggplot needs at least 3 inputs:
+
+- the **data** (a data.frame of the stuff we want to plot)
+- the **aesthetics** (how the data maps to the plot)
+- the **geom** layer (how you want the plot drawn, points, lines, etc.)
+
+```{r}
+ggplot(cars) + 
+  aes(x=speed, y=dist) + 
+  geom_point()
+```
+
+## Lets add some features (more layers)
+
+Lets add a trend line that shows the relationship bewteen `speed` and `distance`
+
+```{r}
+ggplot(cars) + 
+  aes(x=speed, y=dist) + 
+  geom_point() +
+  geom_smooth() 
+```
+
+Now to clean up the ``geo_smooth()``
+
+```{r}
+ggplot(cars) + 
+  aes(x=speed, y=dist) + 
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_bw() + 
+  labs(x="Speed (MPH)", y="Stopping Distance (ft)" , title= "Stopping distance in some old cars")
+```
+
+## Gene Expression Plot
+
+Frist we will read some expression data for the effects of a GLP-1 drug
+
+```{r}
+url <- "https://bioboot.github.io/bimm143_S20/class-material/up_down_expression.txt"
+genes <- read.delim(url)
+head(genes)
+```
+Now for the ``ggplot()``
+
+```{r}
+ggplot(genes) + 
+  aes(x=Condition1, y=Condition2) + 
+  geom_point() +
+  geom_smooth() 
+```
+
+Now to clean up the ``ggplot()``
+
+```{r}
+ggplot(genes) + 
+  aes(x=Condition1, y=Condition2, col=State) + 
+  geom_point() +
+  scale_colour_manual( values=c("blue","gray","red")) +
+  theme_bw() + 
+  labs(x="Control (no drug)", y="Drug Treatment" , title= "Gene Expression Changes Upon Drug Treatment")
+```
+
+```{r}
+nrow(genes)
+colnames(genes)
+ncol(genes)
+table(genes$State)
+round( table(genes$State)/nrow(genes) * 100, 2 )
+sum(genes$State=="up") / nrow(genes) *100
+round(2.444188,2)
+```
+
+
+## Going Further
+
+Here we read the famous *gapmider*
+
+```{r}
+# File location online
+url <- "https://raw.githubusercontent.com/jennybc/gapminder/master/inst/extdata/gapminder.tsv"
+
+gapminder <- read.delim(url)
+head(gapminder)
+```
+
+> Q. How many entries are in this dataset?
+
+```{r}
+nrow(gapminder)
+```
+
+> Q. How many different "country" values are in this dataset?
+
+```{r}
+length( unique(gapminder$country))
+```
+
+Useful ``Functions``:
+- nrow()
+- table()
+- unique()
+- length()
+
+
+Lets make our first plot of `gdpPercap` vs `lifeExp` :
+
+```{r}
+ggplot(gapminder) + 
+  aes(x=gdpPercap, y=lifeExp, col=continent) + 
+  geom_point(alpha=0.25)
+```
+
+One useful layer we can add to explore big datasets like this is called **facetting**
+
+```{r}
+ggplot(gapminder) + 
+  aes(x=gdpPercap, y=lifeExp, col=continent) + 
+  geom_point(alpha=0.5) +
+  facet_wrap(~continent)
+```
+
+### Limit to 1977 and 2007
+
+We can install and use **dplyr** package to help us "filter" the full dataset down to a smaller subset that only includes the years I want.
+
+First we need to run 'install.packages(dplyr)' and then load it with 'library(dplyr)'.
+
+```{r}
+library(dplyr)
+
+filter(gapminder, year==2007, country== "United States")
+#gapminder$year 
+```
+
+> Q. Make a histogram of lifeExp fil color by contenient
+
+```{r}
+ggplot(gapminder) + 
+  aes(lifeExp, fill=continent) + 
+  geom_histogram(alpha=1)
+```
+
+> Q. Now for a boxplot
+
+```{r}
+ggplot(gapminder) + 
+  aes(lifeExp, fill=continent) + 
+  geom_boxplot(alpha=1)
+```
+
