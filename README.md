@@ -1,3 +1,3 @@
 # BIM 143
 
-My classwork
+My classwork from Bimm143 at UC San Diego
